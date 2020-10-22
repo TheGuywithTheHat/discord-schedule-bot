@@ -39,16 +39,16 @@ function parse(message) {
 
 function checkTime() {
     if(lastTime === null) {
-        client.user.setStatus('');
+        client.user.setActivity('');
         return;
     }
     let future = lastTime - new Date();
     let minutes = Math.ceil(future / 60 / 1000);
     if(minutes < 60) {
-        client.user.setPresence({ activity: { name: 'some games in ' + minutes + ' minute' + (minutes === 1 ? '' : 's') }});
+        client.user.setActivity('games in ' + minutes + ' minute' + (minutes === 1 ? '' : 's'));
     } else {
         let hours = Math.round(future / 60 / 1000 / 60);
-        client.user.setPresence({ activity: { name: 'some games in ' + hours + ' hour' + (hours === 1 ? '' : 's') }});
+        client.user.setActivity('games in ' + hours + ' hour' + (hours === 1 ? '' : 's'));
     }
     if(future < 60000) {
         clearTimeout(timeout);
@@ -58,7 +58,7 @@ function checkTime() {
 }
 
 async function ping() {
-    client.user.setPresence({ activity: null });
+    client.user.setActivity();
     let users = lastMessage.reactions.cache.flatMap(u => u.users.cache).mapValues(u => new String(u));
     lastMessage.channel.send(users.reduce((list, user) => list + ' ' + user, 'Game time'));
 }
