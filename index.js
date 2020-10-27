@@ -17,7 +17,9 @@ var interval = null;
 var timeout = null;
 
 function parse(message) {
-    if(message.content.startsWith('!schedule ')) {
+    if(message.content === '!schedule clear') {
+        clear();
+    } else if(message.content.includes('!schedule ')) {
         let now = new Date();
         let time = chrono.parse(message.content, now, { forwardDate: true });
         if(!time[0]) {
@@ -28,13 +30,34 @@ function parse(message) {
             time[0].start.knownValues.hour += 12;
         }
         lastTime = time[0].date();
+        message.reply('sending notification in ' + durationToString(lastTime - now));
         console.log(lastTime);
         lastMessage = message;
-        clearInterval(interval);
-        clearTimeout(timeout);
+        clear();
         interval = setInterval(checkTime, 60000);
         checkTime();
     }
+}
+
+function durationToString(duration) {
+    let output = '';
+    let minutes = Math.ceil(duration / 60 / 1000);
+    if(minutes >= 60) {
+        let hours = Math.floor(minutes / 60);
+        output = hours + ' hour' + (hours === 1 ? '' : 's')
+        minutes -= hours * 60;
+        if(minutes > 0) {
+            output += ', ' + minutes + ' minute' + (minutes === 1 ? '' : 's');
+        }
+    } else {
+        output = minutes + ' minute' + (minutes === 1 ? '' : 's')
+    }
+    return output;
+}
+
+function clear() {
+    clearInterval(interval);
+    clearTimeout(timeout);
 }
 
 function checkTime() {
@@ -43,16 +66,9 @@ function checkTime() {
         return;
     }
     let future = lastTime - new Date();
-    let minutes = Math.ceil(future / 60 / 1000);
-    if(minutes < 60) {
-        client.user.setActivity('games in ' + minutes + ' minute' + (minutes === 1 ? '' : 's'));
-    } else {
-        let hours = Math.round(future / 60 / 1000 / 60);
-        client.user.setActivity('games in ' + hours + ' hour' + (hours === 1 ? '' : 's'));
-    }
+    client.user.setActivity('games in ' + durationToString(future));
     if(future < 60000) {
-        clearTimeout(timeout);
-        clearInterval(interval);
+        clear();
         setTimeout(ping, future);
     }
 }
