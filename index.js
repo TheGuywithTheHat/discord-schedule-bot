@@ -19,7 +19,7 @@ var timeout = null;
 function parse(message) {
     if(message.content === '!schedule clear') {
         clear();
-    } else if(message.content.includes('!schedule ')) {
+    } else if(/!schedule\b/.test(message.content)) {
         let now = new Date();
         let time = chrono.parse(message.content, now, { forwardDate: true });
         if(!time[0]) {
